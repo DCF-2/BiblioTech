@@ -1,0 +1,59 @@
+name: Pipeline BiblioTech
+
+# Quando isso vai rodar?
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Tarefa 1: Testar o Código
+  testar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Rodar Testes
+        run: mvn test
+
+  # Tarefa 2: Build e Deploy (Só roda se os testes passarem)
+  construir-e-publicar:
+    needs: testar # Espera a tarefa 'testar' terminar com sucesso
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Só roda se for na branch main
+    
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Gerar o arquivo .jar (Build)
+        run: mvn clean package -DskipTests # Pula testes pq já rodaram acima
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Construir e Enviar Imagem Docker
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bibliotech:latest
