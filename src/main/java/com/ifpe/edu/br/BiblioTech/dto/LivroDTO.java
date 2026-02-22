@@ -1,0 +1,11 @@
+package com.ifpe.edu.br.BiblioTech.dto;
+
+import lombok.Data;
+
+@Data
+public class LivroDTO {
+    private String titulo;
+    private String autor;
+    private String isbn;
+    private int quantidadeTotal;
+}
