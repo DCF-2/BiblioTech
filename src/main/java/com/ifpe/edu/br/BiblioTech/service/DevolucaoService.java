@@ -61,7 +61,7 @@ public class DevolucaoService {
             usuario.setStatusAtividade("Com Pendência");
             usuarioRepository.save(usuario);
 
-            mensagemFinal = String.format("Devolução em atraso (%d dia(s)). Multa de R$ %.2f gerada para o usuário.", diasAtraso, valorMulta);
+            mensagemFinal = String.format(java.util.Locale.forLanguageTag("pt-BR"), "Devolução em atraso (%d dia(s)). Multa de R$ %.2f gerada para o usuário.", diasAtraso, valorMulta);
         }
 
         emprestimoRepository.save(emprestimo);
