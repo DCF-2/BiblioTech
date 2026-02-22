@@ -18,4 +18,6 @@ public class Usuario {
     private String senha;
     
     private String cargo; // ALUNO, FUNCIONARIO, ADMIN (TC010)
+
+    private String statusAtividade; // Ex: "ATIVO", "Com Pendência"
 }
