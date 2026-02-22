@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -57,5 +58,33 @@ public class EmprestimoService {
         emprestimoRepository.save(emprestimo);
 
         return "Solicitação aprovada. Retire o livro no balcão em até 24h.";
+    }
+
+    // TC008 e TC009: Regras de Renovação
+    public String renovarEmprestimo(Long emprestimoId) throws Exception {
+        Optional<Emprestimo> empOpt = emprestimoRepository.findById(emprestimoId);
+        if (empOpt.isEmpty()) {
+            throw new Exception("Empréstimo não encontrado.");
+        }
+
+        Emprestimo emprestimo = empOpt.get();
+        Livro livro = emprestimo.getLivro();
+
+        // TC009: Verifica se tem reserva
+        if (livro.isTemReserva()) {
+            throw new Exception("Renovação não permitida. Este item possui reserva aguardando.");
+        }
+
+        // TC008: Renova por mais 7 dias a partir da data de devolução prevista atual
+        emprestimo.setDataDevolucaoPrevista(emprestimo.getDataDevolucaoPrevista().plusDays(7));
+        emprestimo.setStatus("Renovado");
+        emprestimoRepository.save(emprestimo);
+
+        return "Empréstimo renovado com sucesso.";
+    }
+
+    // TC014: Consulta de Histórico
+    public List<Emprestimo> consultarHistorico(Usuario usuario) {
+        return emprestimoRepository.findByUsuarioOrderByDataEmprestimoDesc(usuario);
     }
 }
